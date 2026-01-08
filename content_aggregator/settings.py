@@ -23,13 +23,16 @@ load_dotenv()
 
 # Celery settings
 
-# Redis URL with SSL options embedded
-# So setting the ssl_cert_reqs in query string worked for heroku development
+# Redis URL configuration
 redis_url = os.getenv("REDIS_URL", 'redis://localhost:6379')
 
-# Append SSL certificate reqs
-CELERY_BROKER_URL = f"{redis_url}?ssl_cert_reqs=CERT_NONE"
-CELERY_RESULT_BACKEND = f"{redis_url}?ssl_cert_reqs=CERT_NONE"
+# Only add SSL params for rediss:// URLs (managed Redis services like Heroku)
+if redis_url.startswith('rediss://'):
+    CELERY_BROKER_URL = f"{redis_url}?ssl_cert_reqs=CERT_NONE"
+    CELERY_RESULT_BACKEND = f"{redis_url}?ssl_cert_reqs=CERT_NONE"
+else:
+    CELERY_BROKER_URL = redis_url
+    CELERY_RESULT_BACKEND = redis_url
 
 # Celery Beat Schedule - Production optimized timing
 # Content is refreshed at different intervals to avoid recycling too often
