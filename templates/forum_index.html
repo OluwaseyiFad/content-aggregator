@@ -4,14 +4,9 @@
 
         <!-- Content -->
             <section>
-                <div id="hero" class="image main">
-                    <div>
-                      <h1 class="heading_shadow" >ALL FORUM POSTS</h1>
-                      <p>
-                        <a href="#" class="cta">Super Blog</a>
-                      </p>
-                    </div>
-                </div>
+                <header class="main">
+                    <h1>Tech Blog Posts</h1>
+                </header>
                 <div class="forum-post">
                 {% for post in posts %}
                      <h2>{{ post.title | safe}}</h2>
