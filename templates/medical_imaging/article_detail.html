@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<section>
+    <header class="main">
+        <h1>{{ article.title }}</h1>
+        <p>
+            <span class="label">{{ article.get_primary_topic_display }}</span>
+            | By {{ article.author.username }}
+            | {{ article.reading_time }} min read
+            {% if article.published_at %}| {{ article.published_at|date:"F d, Y" }}{% endif %}
+        </p>
+    </header>
+
+    {% if article.featured_image %}
+    <span class="image main"><img src="{{ article.featured_image.url }}" alt="{{ article.title }}"></span>
+    {% endif %}
+
+    <!-- Article Body -->
+    <div class="article-content">
+        {{ article.body|safe }}
+    </div>
+
+    <!-- Image Gallery -->
+    {% if article.images.exists %}
+    <hr>
+    <h3>Gallery</h3>
+    <div class="box alt">
+        <div class="row gtr-uniform">
+            {% for image in article.images.all %}
+            <div class="col-4">
+                <span class="image fit">
+                    <img src="{{ image.image.url }}" alt="{{ image.caption }}">
+                </span>
+                {% if image.caption %}<p><small>{{ image.caption }}</small></p>{% endif %}
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Author Actions -->
+    {% if user == article.author or user.is_superuser %}
+    <hr>
+    <div class="actions">
+        <a href="{% url 'medical_imaging:edit_article' article.slug %}" class="button">Edit Article</a>
+        {% if article.status == 'draft' %}
+        <form action="{% url 'medical_imaging:publish_article' article.slug %}" method="post" style="display: inline;">
+            {% csrf_token %}
+            <button type="submit" class="button primary">Publish</button>
+        </form>
+        {% endif %}
+        <a href="{% url 'medical_imaging:delete_article' article.slug %}" class="button small">Delete</a>
+    </div>
+    {% endif %}
+
+    <!-- Related Articles -->
+    {% if related_articles %}
+    <hr>
+    <h3>Related Articles</h3>
+    <div class="posts">
+        {% for related in related_articles %}
+        <article>
+            <h4><a href="{{ related.get_absolute_url }}">{{ related.title }}</a></h4>
+            <p>{{ related.summary|truncatewords:20 }}</p>
+        </article>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- Comments -->
+    <hr>
+    <h3>Comments</h3>
+    {% for comment in comments %}
+    <div class="box">
+        <p><strong>{{ comment.author.username }}</strong> <small>{{ comment.created_at|date:"M d, Y" }}</small></p>
+        <p>{{ comment.body }}</p>
+    </div>
+    {% empty %}
+    <p>No comments yet.</p>
+    {% endfor %}
+</section>
+{% endblock %}

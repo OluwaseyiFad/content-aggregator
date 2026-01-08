@@ -16,4 +16,6 @@ urlpatterns = [
     path("mobile-pc/", MobilePcPageView.as_view(), name="mobile-pc-page"),
     path("job-updates/", JobUpdatesPageView.as_view(), name="job-updates-page"),
     path("crypto/", CryptoPageView.as_view(), name="crypto-page"),
+    path("ai/", AIPageView.as_view(), name="ai-page"),
+    path("dashboard/", AdminDashboardView.as_view(), name="admin-dashboard"),
 ]

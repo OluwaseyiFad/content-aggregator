@@ -31,6 +31,58 @@ redis_url = os.getenv("REDIS_URL", 'redis://localhost:6379')
 CELERY_BROKER_URL = f"{redis_url}?ssl_cert_reqs=CERT_NONE"
 CELERY_RESULT_BACKEND = f"{redis_url}?ssl_cert_reqs=CERT_NONE"
 
+# Celery Beat Schedule - Production optimized timing
+# Content is refreshed at different intervals to avoid recycling too often
+CELERY_BEAT_SCHEDULE = {
+    # High-traffic categories: every 4 hours
+    'fetch-general-content': {
+        'task': 'blog.tasks.fetch_general_content',
+        'schedule': 4 * 60 * 60,  # 4 hours
+    },
+    'fetch-ai-content': {
+        'task': 'blog.tasks.fetch_ai_content',
+        'schedule': 4 * 60 * 60,  # 4 hours
+    },
+    'fetch-crypto-content': {
+        'task': 'blog.tasks.fetch_crypto_content',
+        'schedule': 4 * 60 * 60,  # 4 hours (fast-moving market)
+    },
+    # Medium-traffic categories: every 6 hours
+    'fetch-cyber-content': {
+        'task': 'blog.tasks.fetch_cyber_content',
+        'schedule': 6 * 60 * 60,  # 6 hours
+    },
+    'fetch-software-development': {
+        'task': 'blog.tasks.fetch_sd_content',
+        'schedule': 6 * 60 * 60,  # 6 hours
+    },
+    'fetch-mobile-pc-content': {
+        'task': 'blog.tasks.fetch_mobile_pc_content',
+        'schedule': 6 * 60 * 60,  # 6 hours
+    },
+    'fetch-medical-news': {
+        'task': 'blog.tasks.fetch_medical_news',
+        'schedule': 6 * 60 * 60,  # 6 hours
+    },
+    # Lower-traffic categories: every 8 hours
+    'fetch-python-content': {
+        'task': 'blog.tasks.fetch_python_content',
+        'schedule': 8 * 60 * 60,  # 8 hours
+    },
+    'fetch-ui-ux-content': {
+        'task': 'blog.tasks.fetch_ui_ux_content',
+        'schedule': 8 * 60 * 60,  # 8 hours
+    },
+    'fetch-ai-medical-imaging': {
+        'task': 'blog.tasks.fetch_ai_medical_imaging',
+        'schedule': 8 * 60 * 60,  # 8 hours
+    },
+    # Slow-moving categories: every 12 hours
+    'fetch-tech-jobs': {
+        'task': 'blog.tasks.fetch_tech_jobs',
+        'schedule': 12 * 60 * 60,  # 12 hours
+    },
+}
 
 # Adding SSL configuration
 # Setting ssl_cert_reqs as a dictionary format in transport options here didn't work which is interesting
@@ -74,6 +126,9 @@ INSTALLED_APPS = [
     "blog.apps.BlogConfig",
     "forum.apps.ForumConfig",
     "user_creation.apps.UserCreationConfig",
+    "medical_imaging.apps.MedicalImagingConfig",
+    "personal_blog.apps.PersonalBlogConfig",
+    "stories.apps.StoriesConfig",
 
     # Third-Party Apps
     'django_celery_beat',
@@ -177,6 +232,10 @@ STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
 STATICFILES_DIRS = (os.path.join(BASE_DIR, "static"),)
 
 
+# Media files (user uploads)
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
 # CKEditor settings
 CKEDITOR_UPLOAD_PATH = 'upload/'
 CKEDITOR_BASEPATH = "/static/ckeditor/ckeditor/"
@@ -185,8 +244,13 @@ CKEDITOR_BASEPATH = "/static/ckeditor/ckeditor/"
 CKEDITOR_CONFIGS = {
     'default': {
         'toolbar': 'full',
-        'height': 300,
-        'width': 300,
+        'height': 400,
+        'width': '100%',
+        'extraPlugins': ','.join([
+            'codesnippet',
+            'uploadimage',
+        ]),
+        'codeSnippet_theme': 'monokai_sublime',
     },
 }
 

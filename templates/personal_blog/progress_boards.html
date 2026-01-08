@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<section>
+    <header class="main">
+        <h1>Progress Boards</h1>
+        <p>Track what I'm working on</p>
+    </header>
+
+    {% if user.is_staff %}
+    <p><a href="{% url 'personal_blog:create_board' %}" class="button primary">Create New Board</a></p>
+    {% endif %}
+
+    <div class="posts">
+        {% for board in boards %}
+        <article>
+            <h3><a href="{{ board.get_absolute_url }}">{{ board.title }}</a></h3>
+            <p>{{ board.description|truncatewords:30 }}</p>
+            <small>Last updated: {{ board.updated_at|date:"M d, Y" }}</small>
+            <ul class="actions">
+                <li><a href="{{ board.get_absolute_url }}" class="button">View Board</a></li>
+            </ul>
+        </article>
+        {% empty %}
+        <p>No progress boards yet.</p>
+        {% endfor %}
+    </div>
+
+    <!-- Pagination -->
+    {% if page_obj.has_other_pages %}
+    <div class="pagination">
+        {% if page_obj.has_previous %}
+        <a href="?page={{ page_obj.previous_page_number }}" class="button small">&laquo; Previous</a>
+        {% endif %}
+        <span>Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
+        {% if page_obj.has_next %}
+        <a href="?page={{ page_obj.next_page_number }}" class="button small">Next &raquo;</a>
+        {% endif %}
+    </div>
+    {% endif %}
+</section>
+{% endblock %}

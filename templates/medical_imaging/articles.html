@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<section>
+    <header class="main">
+        <h1>Articles & Research</h1>
+        <p>My writings on AI fairness, bias, and medical imaging</p>
+    </header>
+
+    <!-- Topic Filter -->
+    <div class="box" style="margin-bottom: 2em;">
+        <h3>Filter by Topic</h3>
+        <a href="{% url 'medical_imaging:articles' %}" class="button small {% if not current_topic %}primary{% endif %}">All</a>
+        {% for value, label in topics %}
+        <a href="?topic={{ value }}" class="button small {% if current_topic == value %}primary{% endif %}">{{ label }}</a>
+        {% endfor %}
+    </div>
+
+    <!-- Articles List -->
+    <div class="posts">
+        {% for article in articles %}
+        <article>
+            {% if article.featured_image %}
+            <a href="{{ article.get_absolute_url }}" class="image">
+                <img src="{{ article.featured_image.url }}" alt="{{ article.title }}">
+            </a>
+            {% endif %}
+            <h3><a href="{{ article.get_absolute_url }}">{{ article.title }}</a></h3>
+            <p>{{ article.summary|truncatewords:40 }}</p>
+            <p>
+                <span class="label">{{ article.get_primary_topic_display }}</span>
+                <small>{{ article.reading_time }} min read | {{ article.published_at|date:"M d, Y" }}</small>
+            </p>
+            <ul class="actions">
+                <li><a href="{{ article.get_absolute_url }}" class="button">Read Article</a></li>
+            </ul>
+        </article>
+        {% empty %}
+        <p>No articles published yet. Check back soon!</p>
+        {% endfor %}
+    </div>
+
+    <!-- Pagination -->
+    {% if page_obj.has_other_pages %}
+    <ul class="pagination">
+        <li>{% if page_obj.has_previous %}<a href="?page={{ page_obj.previous_page_number }}{% if current_topic %}&topic={{ current_topic }}{% endif %}" class="page">Prev</a>{% endif %}</li>
+        {% for num in page_obj.paginator.page_range %}
+            {% if num == page_obj.number %}
+                <li><span class="page active">{{ num }}</span></li>
+            {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                <li><a href="?page={{ num }}{% if current_topic %}&topic={{ current_topic }}{% endif %}" class="page">{{ num }}</a></li>
+            {% endif %}
+        {% endfor %}
+        <li>{% if page_obj.has_next %}<a href="?page={{ page_obj.next_page_number }}{% if current_topic %}&topic={{ current_topic }}{% endif %}" class="page">Next</a>{% endif %}</li>
+    </ul>
+    {% endif %}
+</section>
+{% endblock %}

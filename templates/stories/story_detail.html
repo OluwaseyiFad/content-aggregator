@@ -1,0 +1,134 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<style>
+    .story-content {
+        font-size: 1.1em;
+        line-height: 1.8;
+        max-width: 700px;
+    }
+    .story-meta {
+        border-bottom: 1px solid #eee;
+        padding-bottom: 1em;
+        margin-bottom: 2em;
+    }
+    .like-button {
+        cursor: pointer;
+    }
+    .like-button.liked {
+        color: #e74c3c;
+    }
+</style>
+
+<section>
+    <header class="main">
+        <h1>{{ story.title }}</h1>
+        <div class="story-meta">
+            <p>
+                <span class="label">{{ story.get_genre_display }}</span>
+                | By <a href="{% url 'stories:author_profile' story.author.username %}">{{ story.author.username }}</a>
+                | {{ story.word_count }} words
+                | {{ story.reading_time }} min read
+            </p>
+            {% if story.published_at %}<small>Published {{ story.published_at|date:"F d, Y" }}</small>{% endif %}
+        </div>
+    </header>
+
+    {% if story.cover_image %}
+    <span class="image main"><img src="{{ story.cover_image.url }}" alt="{{ story.title }}"></span>
+    {% endif %}
+
+    <!-- Story Summary -->
+    <blockquote>{{ story.summary }}</blockquote>
+
+    <!-- Story Content -->
+    <div class="story-content">
+        {{ story.body|safe }}
+    </div>
+
+    <!-- Chapters (if any) -->
+    {% if chapters %}
+    <hr>
+    <h3>Chapters</h3>
+    {% for chapter in chapters %}
+    <div class="box">
+        <h4>Chapter {{ chapter.order }}: {{ chapter.title }}</h4>
+        <p>{{ chapter.body|safe }}</p>
+    </div>
+    {% endfor %}
+    {% endif %}
+
+    <!-- Like Button -->
+    <hr>
+    <div>
+        <span class="like-button {% if user_liked %}liked{% endif %}" onclick="likeStory()">
+            <i class="fas fa-heart"></i> <span id="like-count">{{ like_count }}</span> likes
+        </span>
+    </div>
+
+    <!-- Author Actions -->
+    {% if user == story.author or user.is_superuser %}
+    <hr>
+    <div class="actions">
+        <a href="{% url 'stories:edit_story' story.slug %}" class="button">Edit Story</a>
+        {% if not story.is_published %}
+        <form action="{% url 'stories:publish_story' story.slug %}" method="post" style="display: inline;">
+            {% csrf_token %}
+            <button type="submit" class="button primary">Publish</button>
+        </form>
+        {% endif %}
+    </div>
+    {% endif %}
+
+    <!-- Related Stories -->
+    {% if related_stories %}
+    <hr>
+    <h3>More {{ story.get_genre_display }} Stories</h3>
+    <div class="posts">
+        {% for related in related_stories %}
+        <article>
+            <h4><a href="{{ related.get_absolute_url }}">{{ related.title }}</a></h4>
+            <p>{{ related.summary|truncatewords:20 }}</p>
+            <small>By {{ related.author.username }}</small>
+        </article>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- Comments -->
+    <hr>
+    <h3>Comments</h3>
+    {% for comment in comments %}
+    <div class="box">
+        <p><strong>{{ comment.author.username }}</strong> <small>{{ comment.created_at|date:"M d, Y" }}</small></p>
+        <p>{{ comment.body }}</p>
+    </div>
+    {% empty %}
+    <p>No comments yet.</p>
+    {% endfor %}
+</section>
+
+{% if user.is_authenticated %}
+<script>
+function likeStory() {
+    fetch('{% url "stories:like_story" story.slug %}', {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': '{{ csrf_token }}',
+        },
+    })
+    .then(response => response.json())
+    .then(data => {
+        document.getElementById('like-count').textContent = data.count;
+        const btn = document.querySelector('.like-button');
+        if (data.liked) {
+            btn.classList.add('liked');
+        } else {
+            btn.classList.remove('liked');
+        }
+    });
+}
+</script>
+{% endif %}
+{% endblock %}

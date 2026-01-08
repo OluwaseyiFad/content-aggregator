@@ -1,0 +1,30 @@
+
+{% extends "base.html" %}
+{% load static %}
+{% csrf_token %}
+
+{% block content %}
+
+        <!-- Content -->
+            <section>
+                <header class="main">
+                    <h1>Artificial Intelligence</h1>
+                </header>
+
+                <div class="posts">
+                    {% for content in contents %}
+                        <article>
+                            <a href="#" class="image">
+                                 <img src="{{ content.image }}" alt="{{ content.content_name|escape }}">
+                            </a>
+                            <h3>{{ content.title|escape }}</h3>
+                            <p>{{ content.description|escape|safe| slice:":400" }}</p>
+                            <ul class="actions">
+                                <li><a href="{{ content.link }}" class="button" target="_blank">More</a></li>
+                            </ul>
+                        </article>
+                    {% endfor %}
+                 </div>
+            </section>
+
+{% endblock %}

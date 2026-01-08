@@ -1,0 +1,49 @@
+
+{% extends "base.html" %}
+{% load static %}
+{% csrf_token %}
+
+{% block content %}
+
+        <!-- Content -->
+            <section>
+                <header class="main">
+                    <h1>AI in Medical Imaging</h1>
+                </header>
+
+                <div class="posts">
+                    {% for content in contents %}
+                        <article>
+                            {% if content.image %}
+                            <a href="#" class="image">
+                                 <img src="{{ content.image }}" alt="{{ content.content_name|escape }}">
+                            </a>
+                            {% endif %}
+                            <h3>{{ content.title|escape }}</h3>
+                            <p>{{ content.description|escape|safe| slice:":400" }}</p>
+                            <ul class="actions">
+                                <li><a href="{{ content.link }}" class="button" target="_blank">More</a></li>
+                            </ul>
+                        </article>
+                    {% empty %}
+                        <p>No AI imaging articles yet.</p>
+                    {% endfor %}
+                 </div>
+
+                 <!-- Pagination -->
+                 {% if page_obj.has_other_pages %}
+                 <ul class="pagination">
+                     <li>{% if page_obj.has_previous %}<a href="?page={{ page_obj.previous_page_number }}" class="page">Prev</a>{% endif %}</li>
+                     {% for num in page_obj.paginator.page_range %}
+                         {% if num == page_obj.number %}
+                             <li><span class="page active">{{ num }}</span></li>
+                         {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                             <li><a href="?page={{ num }}" class="page">{{ num }}</a></li>
+                         {% endif %}
+                     {% endfor %}
+                     <li>{% if page_obj.has_next %}<a href="?page={{ page_obj.next_page_number }}" class="page">Next</a>{% endif %}</li>
+                 </ul>
+                 {% endif %}
+            </section>
+
+{% endblock %}

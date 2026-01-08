@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<section>
+    <header class="main">
+        <h1>{{ author.username }}</h1>
+        {% if profile %}
+        {% if profile.display_name %}<p>{{ profile.display_name }}</p>{% endif %}
+        {% endif %}
+    </header>
+
+    {% if profile and profile.avatar %}
+    <span class="image left"><img src="{{ profile.avatar.url }}" alt="{{ author.username }}"></span>
+    {% endif %}
+
+    {% if profile and profile.bio %}
+    <p>{{ profile.bio }}</p>
+    {% endif %}
+
+    <p>
+        <strong>{{ total_stories }}</strong> stories published |
+        <strong>{{ total_likes }}</strong> total likes
+    </p>
+
+    {% if profile and profile.website %}
+    <p><a href="{{ profile.website }}" target="_blank">Website</a></p>
+    {% endif %}
+
+    <hr>
+
+    <h2>Stories by {{ author.username }}</h2>
+    <div class="posts">
+        {% for story in stories %}
+        <article>
+            {% if story.cover_image %}
+            <a href="{{ story.get_absolute_url }}" class="image">
+                <img src="{{ story.cover_image.url }}" alt="{{ story.title }}">
+            </a>
+            {% endif %}
+            <h3><a href="{{ story.get_absolute_url }}">{{ story.title }}</a></h3>
+            <p>{{ story.summary|truncatewords:25 }}</p>
+            <p>
+                <span class="label">{{ story.get_genre_display }}</span>
+                <small>{{ story.reading_time }} min read</small>
+            </p>
+            <ul class="actions">
+                <li><a href="{{ story.get_absolute_url }}" class="button">Read Story</a></li>
+            </ul>
+        </article>
+        {% empty %}
+        <p>No published stories yet.</p>
+        {% endfor %}
+    </div>
+</section>
+{% endblock %}

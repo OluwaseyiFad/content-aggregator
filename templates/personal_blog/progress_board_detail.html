@@ -1,0 +1,122 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<style>
+    .kanban-board {
+        display: flex;
+        gap: 1em;
+        overflow-x: auto;
+        padding: 1em 0;
+    }
+    .kanban-column {
+        min-width: 250px;
+        background: #f5f5f5;
+        border-radius: 8px;
+        padding: 1em;
+    }
+    .kanban-column h4 {
+        margin-bottom: 1em;
+        padding-bottom: 0.5em;
+        border-bottom: 3px solid;
+    }
+    .kanban-card {
+        background: white;
+        border-radius: 4px;
+        padding: 0.75em;
+        margin-bottom: 0.5em;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+    .kanban-card.completed {
+        opacity: 0.6;
+        text-decoration: line-through;
+    }
+    .kanban-card .title {
+        font-weight: bold;
+        margin-bottom: 0.25em;
+    }
+    .kanban-card .description {
+        font-size: 0.9em;
+        color: #666;
+    }
+</style>
+
+<section>
+    <header class="main">
+        <h1>{{ board.title }}</h1>
+        {% if board.description %}<p>{{ board.description }}</p>{% endif %}
+    </header>
+
+    <div class="kanban-board">
+        {% for column in columns %}
+        <div class="kanban-column" data-column-id="{{ column.pk }}">
+            <h4 style="border-color: {{ column.color }};">{{ column.title }}</h4>
+
+            {% for card in column.cards.all %}
+            <div class="kanban-card {% if card.completed %}completed{% endif %}" data-card-id="{{ card.pk }}">
+                <div class="title">{{ card.title }}</div>
+                {% if card.description %}<div class="description">{{ card.description }}</div>{% endif %}
+                {% if card.due_date %}<small>Due: {{ card.due_date|date:"M d" }}</small>{% endif %}
+                {% if can_edit %}
+                <button class="toggle-complete" onclick="toggleCard({{ card.pk }})" style="font-size: 0.8em; margin-top: 0.5em;">
+                    {% if card.completed %}Mark Incomplete{% else %}Mark Complete{% endif %}
+                </button>
+                {% endif %}
+            </div>
+            {% endfor %}
+
+            {% if can_edit %}
+            <div class="add-card">
+                <input type="text" placeholder="Add card..." class="card-input" data-column="{{ column.pk }}" style="width: 100%; padding: 0.5em; margin-top: 0.5em;">
+            </div>
+            {% endif %}
+        </div>
+        {% endfor %}
+    </div>
+
+    {% if can_edit %}
+    <hr>
+    <p><a href="{% url 'personal_blog:my_boards' %}" class="button">Back to My Boards</a></p>
+    {% endif %}
+</section>
+
+{% if can_edit %}
+<script>
+function toggleCard(cardId) {
+    fetch(`/blog/api/card/${cardId}/toggle/`, {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': '{{ csrf_token }}',
+            'Content-Type': 'application/x-www-form-urlencoded',
+        },
+    })
+    .then(response => response.json())
+    .then(data => {
+        location.reload();
+    });
+}
+
+document.querySelectorAll('.card-input').forEach(input => {
+    input.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter' && this.value.trim()) {
+            const columnId = this.dataset.column;
+            const formData = new FormData();
+            formData.append('title', this.value.trim());
+
+            fetch(`/blog/api/column/${columnId}/add-card/`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': '{{ csrf_token }}',
+                },
+                body: formData,
+            })
+            .then(response => response.json())
+            .then(data => {
+                location.reload();
+            });
+        }
+    });
+});
+</script>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,89 @@
+
+{% extends "base.html" %}
+{% load static %}
+{% csrf_token %}
+
+{% block content %}
+
+        <!-- Banner -->
+            <section id="banner">
+                <div class="content">
+                    <header>
+                        <h1>AI & Medical Imaging</h1>
+                        <p>Exploring fairness, bias, and innovation in healthcare AI</p>
+                    </header>
+                </div>
+            </section>
+
+        <!-- Featured Article -->
+        {% if featured_article %}
+            <section>
+                <header class="major">
+                    <h2>Featured Article</h2>
+                </header>
+                <div class="box">
+                    {% if featured_article.featured_image %}
+                    <span class="image left"><img src="{{ featured_article.featured_image.url }}" alt="{{ featured_article.title }}"></span>
+                    {% endif %}
+                    <h3><a href="{{ featured_article.get_absolute_url }}">{{ featured_article.title }}</a></h3>
+                    <p>{{ featured_article.summary }}</p>
+                    <p><small>By {{ featured_article.author.username }} | {{ featured_article.reading_time }} min read</small></p>
+                    <a href="{{ featured_article.get_absolute_url }}" class="button primary">Read Article</a>
+                </div>
+            </section>
+        {% endif %}
+
+        <!-- My Articles -->
+        {% if recent_articles %}
+            <section>
+                <header class="major">
+                    <h2>My Articles</h2>
+                </header>
+                <div class="posts">
+                    {% for article in recent_articles %}
+                        <article>
+                            {% if article.featured_image %}
+                            <a href="{{ article.get_absolute_url }}" class="image">
+                                <img src="{{ article.featured_image.url }}" alt="{{ article.title }}">
+                            </a>
+                            {% endif %}
+                            <h3><a href="{{ article.get_absolute_url }}">{{ article.title }}</a></h3>
+                            <p>{{ article.summary|truncatewords:30 }}</p>
+                            <ul class="actions">
+                                <li><a href="{{ article.get_absolute_url }}" class="button">More</a></li>
+                            </ul>
+                        </article>
+                    {% endfor %}
+                </div>
+                <ul class="actions">
+                    <li><a href="{% url 'medical_imaging:articles' %}" class="button">View All Articles</a></li>
+                </ul>
+            </section>
+        {% endif %}
+
+        <!-- Latest News -->
+            <section>
+                <header class="major">
+                    <h2>Latest News</h2>
+                </header>
+                <div class="posts">
+                    {% for content in rss_contents %}
+                        <article>
+                            {% if content.image %}
+                            <a href="#" class="image">
+                                 <img src="{{ content.image }}" alt="{{ content.content_name|escape }}">
+                            </a>
+                            {% endif %}
+                            <h3>{{ content.title|escape }}</h3>
+                            <p>{{ content.description|escape|safe | slice:":400" }}</p>
+                            <ul class="actions">
+                                <li><a href="{{ content.link }}" class="button" target="_blank">More</a></li>
+                            </ul>
+                        </article>
+                    {% empty %}
+                        <p>No articles yet. Check back soon for content from our RSS feeds.</p>
+                    {% endfor %}
+                </div>
+            </section>
+
+{% endblock %}

@@ -1,0 +1,281 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<section>
+    <header class="main">
+        <h1>Admin Dashboard</h1>
+        <p>Welcome back, {{ user.username }}!</p>
+    </header>
+
+    <!-- Quick Stats Overview -->
+    <div class="box">
+        <h2>Overview</h2>
+        <div class="row">
+            <div class="col-3 col-6-medium col-12-small">
+                <h3>{{ total_rss_content }}</h3>
+                <p>Total RSS Content</p>
+            </div>
+            <div class="col-3 col-6-medium col-12-small">
+                <h3>{{ active_feeds }}</h3>
+                <p>Active RSS Feeds</p>
+            </div>
+            <div class="col-3 col-6-medium col-12-small">
+                <h3>{{ total_users }}</h3>
+                <p>Total Users</p>
+            </div>
+            <div class="col-3 col-6-medium col-12-small">
+                <h3>{{ total_bookmarks }}</h3>
+                <p>Bookmarks</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <section>
+        <header class="major">
+            <h2>Quick Actions</h2>
+        </header>
+        <div class="row">
+            <div class="col-4 col-12-medium">
+                <h3>Content</h3>
+                <ul class="actions stacked">
+                    <li><a href="{% url 'admin:index' %}" class="button primary fit">Django Admin</a></li>
+                    <li><a href="{% url 'forum:create-post' %}" class="button fit">New Tech Post</a></li>
+                    <li><a href="{% url 'medical_imaging:create_article' %}" class="button fit">New Medical Article</a></li>
+                    <li><a href="{% url 'personal_blog:create_post' %}" class="button fit">New Blog Post</a></li>
+                    <li><a href="{% url 'stories:create_story' %}" class="button fit">New Story</a></li>
+                </ul>
+            </div>
+            <div class="col-4 col-12-medium">
+                <h3>Manage</h3>
+                <ul class="actions stacked">
+                    <li><a href="{% url 'admin:blog_rssfeed_changelist' %}" class="button fit">Manage RSS Feeds</a></li>
+                    <li><a href="{% url 'admin:auth_user_changelist' %}" class="button fit">Manage Users</a></li>
+                    <li><a href="{% url 'medical_imaging:my_articles' %}" class="button fit">My Medical Articles</a></li>
+                    <li><a href="{% url 'personal_blog:my_posts' %}" class="button fit">My Blog Posts</a></li>
+                    <li><a href="{% url 'stories:my_stories' %}" class="button fit">My Stories</a></li>
+                </ul>
+            </div>
+            <div class="col-4 col-12-medium">
+                <h3>View Content</h3>
+                <ul class="actions stacked">
+                    <li><a href="{% url 'blog:homepage' %}" class="button fit">Homepage</a></li>
+                    <li><a href="{% url 'medical_imaging:index' %}" class="button fit">Medical Imaging</a></li>
+                    <li><a href="{% url 'personal_blog:index' %}" class="button fit">Personal Blog</a></li>
+                    <li><a href="{% url 'stories:index' %}" class="button fit">Stories</a></li>
+                    <li><a href="{% url 'forum:index' %}" class="button fit">Tech Blog</a></li>
+                </ul>
+            </div>
+        </div>
+    </section>
+
+    <!-- Content Stats -->
+    <section>
+        <header class="major">
+            <h2>Content Statistics</h2>
+        </header>
+
+        <div class="row">
+            <!-- RSS Content Stats -->
+            <div class="col-6 col-12-medium">
+                <h3>RSS Feed Content</h3>
+                <div class="table-wrapper">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Category</th>
+                                <th>Count</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr><td>General Tech</td><td>{{ stats.total_general }}</td></tr>
+                            <tr><td>AI & ML</td><td>{{ stats.total_ai }}</td></tr>
+                            <tr><td>Cryptocurrency</td><td>{{ stats.total_crypto }}</td></tr>
+                            <tr><td>Cyber Security</td><td>{{ stats.total_cyber }}</td></tr>
+                            <tr><td>Python</td><td>{{ stats.total_python }}</td></tr>
+                            <tr><td>Software Dev</td><td>{{ stats.total_software }}</td></tr>
+                            <tr><td>UI/UX</td><td>{{ stats.total_uiux }}</td></tr>
+                            <tr><td>Mobile & PC</td><td>{{ stats.total_mobile }}</td></tr>
+                            <tr><td>Job Updates</td><td>{{ stats.total_jobs }}</td></tr>
+                            <tr><td>Medical News</td><td>{{ stats.total_medical }}</td></tr>
+                            <tr><td>AI Medical Imaging</td><td>{{ stats.total_ai_imaging }}</td></tr>
+                        </tbody>
+                        <tfoot>
+                            <tr><td><strong>Total</strong></td><td><strong>{{ total_rss_content }}</strong></td></tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+
+            <!-- User-Created Content Stats -->
+            <div class="col-6 col-12-medium">
+                <h3>User-Created Content</h3>
+                <div class="table-wrapper">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Type</th>
+                                <th>Count</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr><td>Tech Blog Posts</td><td>{{ total_forum_posts }}</td></tr>
+                            <tr><td>Medical Articles (Published)</td><td>{{ published_medical_articles }}</td></tr>
+                            <tr><td>Medical Articles (Draft)</td><td>{{ draft_medical_articles }}</td></tr>
+                            <tr><td>Personal Blog Posts</td><td>{{ total_blog_posts }}</td></tr>
+                            <tr><td>Stories</td><td>{{ total_stories }}</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <h3>User Statistics</h3>
+                <div class="table-wrapper">
+                    <table>
+                        <tbody>
+                            <tr><td>Total Users</td><td>{{ total_users }}</td></tr>
+                            <tr><td>Staff Users</td><td>{{ staff_users }}</td></tr>
+                            <tr><td>New Users (7 days)</td><td>{{ recent_users }}</td></tr>
+                            <tr><td>Total Bookmarks</td><td>{{ total_bookmarks }}</td></tr>
+                            <tr><td>Recent Bookmarks (7 days)</td><td>{{ recent_bookmarks }}</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Moderation -->
+    {% if pending_comments > 0 %}
+    <section>
+        <header class="major">
+            <h2>Pending Moderation</h2>
+        </header>
+        <div class="box" style="background: #fff3cd; border-color: #ffc107;">
+            <p><strong>{{ pending_comments }}</strong> comment(s) pending approval</p>
+            <a href="{% url 'admin:medical_imaging_articlecomment_changelist' %}" class="button primary small">Review Comments</a>
+        </div>
+    </section>
+    {% endif %}
+
+    <!-- RSS Feed Management -->
+    <section>
+        <header class="major">
+            <h2>RSS Feed Management</h2>
+        </header>
+        <p>
+            <strong>{{ active_feeds }}</strong> active feeds |
+            <strong>{{ inactive_feeds }}</strong> inactive feeds |
+            <a href="{% url 'admin:blog_rssfeed_add' %}" class="button primary small">Add New Feed</a>
+        </p>
+
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Category</th>
+                        <th>Status</th>
+                        <th>Last Fetched</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for feed in rss_feeds %}
+                    <tr>
+                        <td>{{ feed.name }}</td>
+                        <td>{{ feed.get_category_display }}</td>
+                        <td>
+                            {% if feed.is_active %}
+                            <span style="color: green;">Active</span>
+                            {% else %}
+                            <span style="color: red;">Inactive</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ feed.last_fetched|default:"Never" }}</td>
+                        <td>
+                            <a href="{% url 'admin:blog_rssfeed_change' feed.pk %}" class="button small">Edit</a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="5">No RSS feeds configured.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <!-- Recent Activity -->
+    <section>
+        <header class="major">
+            <h2>Recent Activity</h2>
+        </header>
+
+        <div class="row">
+            <!-- Recent Medical Articles -->
+            <div class="col-6 col-12-medium">
+                <h3>Recent Medical Articles</h3>
+                <ul>
+                    {% for article in recent_medical_articles %}
+                    <li>
+                        <a href="{{ article.get_absolute_url }}">{{ article.title|truncatewords:10 }}</a>
+                        <br><small>{{ article.created_at|date:"M d, Y" }} - {{ article.get_status_display }}</small>
+                    </li>
+                    {% empty %}
+                    <li>No medical articles yet.</li>
+                    {% endfor %}
+                </ul>
+            </div>
+
+            <!-- Recent Blog Posts -->
+            <div class="col-6 col-12-medium">
+                <h3>Recent Tech Posts</h3>
+                <ul>
+                    {% for post in recent_forum_posts %}
+                    <li>
+                        <a href="{{ post.get_absolute_url }}">{{ post.title|truncatewords:10 }}</a>
+                        <br><small>{{ post.created_at|date:"M d, Y" }}</small>
+                    </li>
+                    {% empty %}
+                    <li>No tech posts yet.</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+
+        <div class="row">
+            <!-- Recent Stories -->
+            <div class="col-6 col-12-medium">
+                <h3>Recent Stories</h3>
+                <ul>
+                    {% for story in recent_stories %}
+                    <li>
+                        <a href="{{ story.get_absolute_url }}">{{ story.title|truncatewords:10 }}</a>
+                        <br><small>{{ story.created_at|date:"M d, Y" }}</small>
+                    </li>
+                    {% empty %}
+                    <li>No stories yet.</li>
+                    {% endfor %}
+                </ul>
+            </div>
+
+            <!-- Recent RSS Content -->
+            <div class="col-6 col-12-medium">
+                <h3>Recent RSS Content (General)</h3>
+                <ul>
+                    {% for content in recent_general %}
+                    <li>
+                        <a href="{{ content.link }}" target="_blank">{{ content.title|truncatewords:10 }}</a>
+                        <br><small>{{ content.pub_date|date:"M d, Y" }}</small>
+                    </li>
+                    {% empty %}
+                    <li>No content yet.</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    </section>
+</section>
+{% endblock %}

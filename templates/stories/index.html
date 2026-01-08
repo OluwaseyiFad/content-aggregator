@@ -1,0 +1,85 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<section>
+    <header class="main">
+        <h1>Short Stories</h1>
+        <p>A collection of creative writing</p>
+    </header>
+
+    <!-- Genre Filter -->
+    <div class="box" style="margin-bottom: 2em;">
+        <h3>Browse by Genre</h3>
+        <a href="{% url 'stories:index' %}" class="button small {% if not current_genre %}primary{% endif %}">All</a>
+        {% for value, label in genres %}
+        <a href="?genre={{ value }}" class="button small {% if current_genre == value %}primary{% endif %}">{{ label }}</a>
+        {% endfor %}
+    </div>
+
+    <!-- Featured Stories -->
+    {% if featured_stories %}
+    <h2>Featured Stories</h2>
+    <div class="posts">
+        {% for story in featured_stories %}
+        <article>
+            {% if story.cover_image %}
+            <a href="{{ story.get_absolute_url }}" class="image">
+                <img src="{{ story.cover_image.url }}" alt="{{ story.title }}">
+            </a>
+            {% endif %}
+            <h3><a href="{{ story.get_absolute_url }}">{{ story.title }}</a></h3>
+            <p>{{ story.summary|truncatewords:30 }}</p>
+            <p>
+                <span class="label">{{ story.get_genre_display }}</span>
+                <small>{{ story.reading_time }} min read</small>
+            </p>
+            <ul class="actions">
+                <li><a href="{{ story.get_absolute_url }}" class="button">Read Story</a></li>
+            </ul>
+        </article>
+        {% endfor %}
+    </div>
+    <hr>
+    {% endif %}
+
+    <!-- All Stories -->
+    <h2>{% if current_genre %}{{ current_genre|title }} Stories{% else %}All Stories{% endif %}</h2>
+    <div class="posts">
+        {% for story in stories %}
+        <article>
+            {% if story.cover_image %}
+            <a href="{{ story.get_absolute_url }}" class="image">
+                <img src="{{ story.cover_image.url }}" alt="{{ story.title }}">
+            </a>
+            {% endif %}
+            <h3><a href="{{ story.get_absolute_url }}">{{ story.title }}</a></h3>
+            <p>{{ story.summary|truncatewords:25 }}</p>
+            <p>
+                <span class="label">{{ story.get_genre_display }}</span>
+                <small>{{ story.word_count }} words | {{ story.reading_time }} min read</small>
+            </p>
+            <small>By <a href="{% url 'stories:author_profile' story.author.username %}">{{ story.author.username }}</a></small>
+            <ul class="actions">
+                <li><a href="{{ story.get_absolute_url }}" class="button">Read Story</a></li>
+            </ul>
+        </article>
+        {% empty %}
+        <p>No stories yet.</p>
+        {% endfor %}
+    </div>
+
+    <!-- Pagination -->
+    {% if page_obj.has_other_pages %}
+    <div class="pagination">
+        {% if page_obj.has_previous %}
+        <a href="?page={{ page_obj.previous_page_number }}{% if current_genre %}&genre={{ current_genre }}{% endif %}" class="button small">&laquo; Previous</a>
+        {% endif %}
+        <span>Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
+        {% if page_obj.has_next %}
+        <a href="?page={{ page_obj.next_page_number }}{% if current_genre %}&genre={{ current_genre }}{% endif %}" class="button small">Next &raquo;</a>
+        {% endif %}
+    </div>
+    {% endif %}
+</section>
+{% endblock %}

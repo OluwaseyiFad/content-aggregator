@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<section>
+    <header class="main">
+        <h1>Authors</h1>
+        <p>Meet our story writers</p>
+    </header>
+
+    <div class="posts">
+        {% for author in authors %}
+        <article>
+            <h3><a href="{% url 'stories:author_profile' author.username %}">{{ author.username }}</a></h3>
+            {% if author.profile and author.profile.bio %}
+            <p>{{ author.profile.bio|truncatewords:30 }}</p>
+            {% endif %}
+            <p><strong>{{ author.story_count }}</strong> stories published</p>
+            <ul class="actions">
+                <li><a href="{% url 'stories:author_profile' author.username %}" class="button">View Profile</a></li>
+            </ul>
+        </article>
+        {% empty %}
+        <p>No authors yet.</p>
+        {% endfor %}
+    </div>
+</section>
+{% endblock %}

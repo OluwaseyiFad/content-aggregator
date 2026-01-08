@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<section>
+    <header class="main">
+        <h1>Personal Blog</h1>
+        <p>Updates, progress, and thoughts</p>
+    </header>
+
+    <!-- Featured Posts -->
+    {% if featured_posts %}
+    <h2>Featured</h2>
+    <div class="posts">
+        {% for post in featured_posts %}
+        <article>
+            {% if post.featured_image %}
+            <a href="{{ post.get_absolute_url }}" class="image">
+                <img src="{{ post.featured_image.url }}" alt="{{ post.title }}">
+            </a>
+            {% endif %}
+            <h3><a href="{{ post.get_absolute_url }}">{{ post.title }}</a></h3>
+            <p>{{ post.excerpt|default:post.body|truncatewords:30|safe }}</p>
+            <ul class="actions">
+                <li><a href="{{ post.get_absolute_url }}" class="button">Read More</a></li>
+            </ul>
+        </article>
+        {% endfor %}
+    </div>
+    <hr>
+    {% endif %}
+
+    <!-- All Posts -->
+    <h2>Recent Posts</h2>
+    <div class="posts">
+        {% for post in posts %}
+        <article>
+            {% if post.featured_image %}
+            <a href="{{ post.get_absolute_url }}" class="image">
+                <img src="{{ post.featured_image.url }}" alt="{{ post.title }}">
+            </a>
+            {% endif %}
+            <h3><a href="{{ post.get_absolute_url }}">{{ post.title }}</a></h3>
+            <p>{{ post.excerpt|default:post.body|truncatewords:30|safe }}</p>
+            <small>{{ post.published_at|date:"M d, Y" }}</small>
+            <ul class="actions">
+                <li><a href="{{ post.get_absolute_url }}" class="button">Read More</a></li>
+            </ul>
+        </article>
+        {% empty %}
+        <p>No posts yet.</p>
+        {% endfor %}
+    </div>
+
+    <!-- Pagination -->
+    {% if page_obj.has_other_pages %}
+    <div class="pagination">
+        {% if page_obj.has_previous %}
+        <a href="?page={{ page_obj.previous_page_number }}" class="button small">&laquo; Previous</a>
+        {% endif %}
+        <span>Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
+        {% if page_obj.has_next %}
+        <a href="?page={{ page_obj.next_page_number }}" class="button small">Next &raquo;</a>
+        {% endif %}
+    </div>
+    {% endif %}
+</section>
+{% endblock %}

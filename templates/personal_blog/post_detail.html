@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<section>
+    <header class="main">
+        <h1>{{ post.title }}</h1>
+        <p>By {{ post.author.username }} | {{ post.published_at|date:"F d, Y" }}</p>
+    </header>
+
+    {% if post.featured_image %}
+    <span class="image main"><img src="{{ post.featured_image.url }}" alt="{{ post.title }}"></span>
+    {% endif %}
+
+    <!-- Post Content -->
+    <div class="post-content">
+        {{ post.body|safe }}
+    </div>
+
+    <!-- Code Snippets -->
+    {% if code_snippets %}
+    <hr>
+    <h3>Code Examples</h3>
+    {% for snippet in code_snippets %}
+    <div class="box">
+        {% if snippet.title %}<h4>{{ snippet.title }}</h4>{% endif %}
+        {% if snippet.description %}<p>{{ snippet.description }}</p>{% endif %}
+        <pre><code class="language-{{ snippet.language }}">{{ snippet.code }}</code></pre>
+    </div>
+    {% endfor %}
+    {% endif %}
+
+    <!-- Image Galleries -->
+    {% if galleries %}
+    <hr>
+    {% for gallery in galleries %}
+    <h3>{{ gallery.title }}</h3>
+    {% if gallery.description %}<p>{{ gallery.description }}</p>{% endif %}
+    <div class="box alt">
+        <div class="row gtr-uniform">
+            {% for image in gallery.images.all %}
+            <div class="col-4">
+                <span class="image fit">
+                    <img src="{{ image.image.url }}" alt="{{ image.caption }}">
+                </span>
+                {% if image.caption %}<p><small>{{ image.caption }}</small></p>{% endif %}
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endfor %}
+    {% endif %}
+
+    <!-- Author Actions -->
+    {% if user == post.author or user.is_superuser %}
+    <hr>
+    <div class="actions">
+        <a href="{% url 'personal_blog:edit_post' post.slug %}" class="button">Edit Post</a>
+        {% if not post.is_published %}
+        <form action="{% url 'personal_blog:publish_post' post.slug %}" method="post" style="display: inline;">
+            {% csrf_token %}
+            <button type="submit" class="button primary">Publish</button>
+        </form>
+        {% endif %}
+    </div>
+    {% endif %}
+
+    <!-- Comments -->
+    <hr>
+    <h3>Comments</h3>
+    {% for comment in comments %}
+    <div class="box">
+        <p><strong>{{ comment.author.username }}</strong> <small>{{ comment.created_at|date:"M d, Y" }}</small></p>
+        <p>{{ comment.body }}</p>
+    </div>
+    {% empty %}
+    <p>No comments yet.</p>
+    {% endfor %}
+</section>
+{% endblock %}
