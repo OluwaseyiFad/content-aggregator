@@ -96,17 +96,6 @@
     </div>
     {% endif %}
 
-    <!-- Comments -->
-    <hr>
-    <h3>Comments</h3>
-    {% for comment in comments %}
-    <div class="box">
-        <p><strong>{{ comment.author.username }}</strong> <small>{{ comment.created_at|date:"M d, Y" }}</small></p>
-        <p>{{ comment.body }}</p>
-    </div>
-    {% empty %}
-    <p>No comments yet.</p>
-    {% endfor %}
 </section>
 
 {% if user.is_authenticated %}
