@@ -63,7 +63,7 @@ class BaseModel(models.Model):
     description = models.TextField()
     pub_date = models.DateTimeField()
     link = models.URLField(max_length=2000)
-    content_name = models.CharField(max_length=100)
+    content_name = models.CharField(max_length=255)
     guid = models.CharField(max_length=1000)
     image = models.URLField(null=True, max_length=2000)
     source_feed = models.ForeignKey(
