@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<section>
+    <header class="main">
+        <h1>My Posts</h1>
+    </header>
+
+    <p><a href="{% url 'personal_blog:create_post' %}" class="button primary">Write New Post</a></p>
+
+    <div class="table-wrapper">
+        <table>
+            <thead>
+                <tr>
+                    <th>Title</th>
+                    <th>Status</th>
+                    <th>Created</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for post in posts %}
+                <tr>
+                    <td><a href="{{ post.get_absolute_url }}">{{ post.title }}</a></td>
+                    <td>
+                        {% if post.is_published %}
+                        <span style="color: green;">Published</span>
+                        {% else %}
+                        <span style="color: orange;">Draft</span>
+                        {% endif %}
+                    </td>
+                    <td>{{ post.created_at|date:"M d, Y" }}</td>
+                    <td>
+                        <a href="{% url 'personal_blog:edit_post' post.slug %}" class="button small">Edit</a>
+                        <a href="{% url 'personal_blog:delete_post' post.slug %}" class="button small" style="background-color: #c0392b;">Delete</a>
+                        {% if not post.is_published %}
+                        <form action="{% url 'personal_blog:publish_post' post.slug %}" method="post" style="display: inline;">
+                            {% csrf_token %}
+                            <button type="submit" class="button small primary">Publish</button>
+                        </form>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="4">No posts yet. <a href="{% url 'personal_blog:create_post' %}">Write your first post!</a></td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</section>
+{% endblock %}

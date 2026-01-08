@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<section>
+    <header class="main">
+        <h1>My Stories</h1>
+    </header>
+
+    <p><a href="{% url 'stories:create_story' %}" class="button primary">Write New Story</a></p>
+
+    <div class="table-wrapper">
+        <table>
+            <thead>
+                <tr>
+                    <th>Title</th>
+                    <th>Genre</th>
+                    <th>Words</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for story in stories %}
+                <tr>
+                    <td><a href="{{ story.get_absolute_url }}">{{ story.title }}</a></td>
+                    <td>{{ story.get_genre_display }}</td>
+                    <td>{{ story.word_count }}</td>
+                    <td>
+                        {% if story.is_published %}
+                        <span style="color: green;">Published</span>
+                        {% else %}
+                        <span style="color: orange;">Draft</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <a href="{% url 'stories:edit_story' story.slug %}" class="button small">Edit</a>
+                        <a href="{% url 'stories:delete_story' story.slug %}" class="button small" style="background-color: #c0392b;">Delete</a>
+                        {% if not story.is_published %}
+                        <form action="{% url 'stories:publish_story' story.slug %}" method="post" style="display: inline;">
+                            {% csrf_token %}
+                            <button type="submit" class="button small primary">Publish</button>
+                        </form>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="5">No stories yet. <a href="{% url 'stories:create_story' %}">Write your first story!</a></td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</section>
+{% endblock %}

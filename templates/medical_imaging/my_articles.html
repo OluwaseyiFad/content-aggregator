@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<section>
+    <header class="main">
+        <h1>My Articles</h1>
+    </header>
+
+    <p><a href="{% url 'medical_imaging:create_article' %}" class="button primary">Write New Article</a></p>
+
+    <div class="table-wrapper">
+        <table>
+            <thead>
+                <tr>
+                    <th>Title</th>
+                    <th>Topic</th>
+                    <th>Status</th>
+                    <th>Created</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for article in articles %}
+                <tr>
+                    <td><a href="{{ article.get_absolute_url }}">{{ article.title }}</a></td>
+                    <td>{{ article.get_primary_topic_display }}</td>
+                    <td>
+                        {% if article.status == 'published' %}
+                        <span style="color: green;">Published</span>
+                        {% else %}
+                        <span style="color: orange;">{{ article.get_status_display }}</span>
+                        {% endif %}
+                    </td>
+                    <td>{{ article.created_at|date:"M d, Y" }}</td>
+                    <td>
+                        <a href="{% url 'medical_imaging:edit_article' article.slug %}" class="button small">Edit</a>
+                        <a href="{% url 'medical_imaging:delete_article' article.slug %}" class="button small" style="background-color: #c0392b;">Delete</a>
+                        {% if article.status == 'draft' %}
+                        <form action="{% url 'medical_imaging:publish_article' article.slug %}" method="post" style="display: inline;">
+                            {% csrf_token %}
+                            <button type="submit" class="button small primary">Publish</button>
+                        </form>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="5">No articles yet. <a href="{% url 'medical_imaging:create_article' %}">Write your first article!</a></td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Pagination -->
+    {% if page_obj.has_other_pages %}
+    <ul class="pagination">
+        <li>{% if page_obj.has_previous %}<a href="?page={{ page_obj.previous_page_number }}" class="page">Prev</a>{% endif %}</li>
+        {% for num in page_obj.paginator.page_range %}
+            {% if num == page_obj.number %}
+                <li><span class="page active">{{ num }}</span></li>
+            {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                <li><a href="?page={{ num }}" class="page">{{ num }}</a></li>
+            {% endif %}
+        {% endfor %}
+        <li>{% if page_obj.has_next %}<a href="?page={{ page_obj.next_page_number }}" class="page">Next</a>{% endif %}</li>
+    </ul>
+    {% endif %}
+</section>
+{% endblock %}

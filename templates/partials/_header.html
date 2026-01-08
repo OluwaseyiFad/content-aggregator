@@ -1,43 +1,95 @@
 {% load static %}
 
 <!-- Menu -->
-  <nav id="menu">
-        <header class="major">
-            <h2>Menu</h2>
-        </header>
-        <ul>
-        <li><a href="{% url 'blog:homepage' %}">Home</a> </li>
-        <li> <a href="{% url 'forum:index' %}">Forum</a>   </li>
+<nav id="menu">
+    <header class="major">
+        <h2>Menu</h2>
+    </header>
+    <ul>
+        <li><a href="{% url 'blog:homepage' %}">Home</a></li>
+
+        {% if user.is_staff %}
+        <!-- Write New Content -->
         <li>
-                <span class="opener">Contents Sections</span>
-                <ul>
-                    <!--<li><a href="{% url 'blog:python-page' %}">Python</a></li>-->
-                     <li><a href="{% url 'blog:cyber-security-page' %}">CyberSecurity</a></li>
-                    <li><a href="{% url 'blog:software-development-page' %}">Software Development</a> </li>
-                    <li><a href="{% url 'blog:ui-ux-page' %}">UI & UX</a> </li>
-                     <li><a href="{% url 'blog:mobile-pc-page' %}">Mobile & PC</a> </li>
-                     <li><a href="{% url 'blog:crypto-page' %}">Crypto</a> </li>
-                    <li><a href="{% url 'blog:job-updates-page' %}">Jobs Updates</a> </li>
-                </ul>
-            </li>
-            {% if user.is_authenticated %}
-                <li>
-                    <span class="opener">My Sections</span>
-                    <ul>
-                        {% if user.is_staff %}
-                            <li><a href="{% url 'forum:create-post' %}">Create Post</a></li>
-                            <li><a href="{% url 'forum:my-posts' %}">My Posts</a></li>
-                        {% endif %}
-                        <li><a href="{% url 'password_change' %}">Change Password</a></li>
-                        <li><a href="{% url 'user-creation:logout' %}">Logout</a></li>
-                    </ul>
-                </li>
-            {% else %}
-                <li><a href="{% url 'user-creation:login' %}">Log in</a></li>
-                <li><a href="{% url 'user-creation:signup' %}">Sign up</a></li>
-            {% endif %}
-        </ul>
-    </nav>
+            <span class="opener">Write New</span>
+            <ul>
+                <li><a href="{% url 'medical_imaging:create_article' %}">Medical Article</a></li>
+                <li><a href="{% url 'personal_blog:create_post' %}">Blog Post</a></li>
+                <li><a href="{% url 'stories:create_story' %}">Short Story</a></li>
+                <li><a href="{% url 'forum:create-post' %}">Tech Post</a></li>
+            </ul>
+        </li>
+
+        <!-- My Content -->
+        <li>
+            <span class="opener">My Content</span>
+            <ul>
+                <li><a href="{% url 'medical_imaging:my_articles' %}">My Medical Articles</a></li>
+                <li><a href="{% url 'personal_blog:my_posts' %}">My Blog Posts</a></li>
+                <li><a href="{% url 'stories:my_stories' %}">My Stories</a></li>
+                <li><a href="{% url 'forum:my-posts' %}">My Tech Posts</a></li>
+            </ul>
+        </li>
+        {% endif %}
+
+        <!-- FEATURED: AI & Medical Imaging -->
+        <li>
+            <span class="opener">AI & Medical Imaging</span>
+            <ul>
+                <li><a href="{% url 'medical_imaging:index' %}">Overview</a></li>
+                <li><a href="{% url 'medical_imaging:medical_news' %}">Medical News</a></li>
+                <li><a href="{% url 'medical_imaging:ai_imaging' %}">AI in Imaging</a></li>
+                <li><a href="{% url 'medical_imaging:articles' %}">Articles & Research</a></li>
+            </ul>
+        </li>
+
+        <!-- Personal Blog -->
+        <li>
+            <span class="opener">Personal Blog</span>
+            <ul>
+                <li><a href="{% url 'personal_blog:index' %}">All Posts</a></li>
+                <li><a href="{% url 'personal_blog:progress_boards' %}">Progress Boards</a></li>
+            </ul>
+        </li>
+
+        <!-- Short Stories -->
+        <li>
+            <span class="opener">Short Stories</span>
+            <ul>
+                <li><a href="{% url 'stories:index' %}">Browse Stories</a></li>
+                <li><a href="{% url 'stories:authors' %}">Authors</a></li>
+            </ul>
+        </li>
+
+        <!-- Tech Blog -->
+        <li><a href="{% url 'forum:index' %}">Tech Blog</a></li>
+
+        <!-- Tech News (RSS Feeds) -->
+        <li>
+            <span class="opener">Tech News</span>
+            <ul>
+                <li><a href="{% url 'blog:ai-page' %}">Artificial Intelligence</a></li>
+                <li><a href="{% url 'blog:cyber-security-page' %}">CyberSecurity</a></li>
+                <li><a href="{% url 'blog:software-development-page' %}">Software Development</a></li>
+                <li><a href="{% url 'blog:ui-ux-page' %}">UI & UX</a></li>
+                <li><a href="{% url 'blog:mobile-pc-page' %}">Mobile & PC</a></li>
+                <li><a href="{% url 'blog:crypto-page' %}">Crypto</a></li>
+                <li><a href="{% url 'blog:job-updates-page' %}">Job Updates</a></li>
+            </ul>
+        </li>
+
+        {% if user.is_staff %}
+        <li>
+            <span class="opener">Dashboard</span>
+            <ul>
+                <li><a href="{% url 'blog:admin-dashboard' %}">Admin Dashboard</a></li>
+                <li><a href="{% url 'admin:index' %}">Django Admin</a></li>
+                <li><a href="{% url 'user-creation:logout' %}">Logout</a></li>
+            </ul>
+        </li>
+        {% endif %}
+    </ul>
+</nav>
 
 		<!-- Section -->
     <section>
