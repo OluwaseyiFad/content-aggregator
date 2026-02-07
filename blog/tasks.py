@@ -185,20 +185,31 @@ def fetch_ai_content():
 
 @shared_task
 def fetch_medical_news():
-    """Fetches medical news and healthcare content from database-managed feeds"""
-    feeds = RSSFeed.objects.filter(category='medical_news', is_active=True)
-    _feeds = [feed.url for feed in feeds]
-    if _feeds:
-        fetch_and_save(_feeds, MedicalNewsContent)
+    """Fetches medical news and healthcare content"""
+    _feeds = [
+        "https://www.sciencedaily.com/rss/health_medicine/diseases_and_conditions.xml",
+        "https://www.medicalnewstoday.com/rss",
+        "https://www.healthline.com/rss",
+        "https://www.medscape.com/rss/public/medscapewire",
+        "https://www.healio.com/rss/specialty",
+        "https://www.fiercepharma.com/rss/xml",
+        "https://www.statnews.com/feed/",
+    ]
+    fetch_and_save(_feeds, MedicalNewsContent)
 
 
 @shared_task
 def fetch_ai_medical_imaging():
-    """Fetches AI in medical imaging content from database-managed feeds"""
-    feeds = RSSFeed.objects.filter(category='ai_medical_imaging', is_active=True)
-    _feeds = [feed.url for feed in feeds]
-    if _feeds:
-        fetch_and_save(_feeds, AIMedicalImagingContent)
+    """Fetches AI in medical imaging content"""
+    _feeds = [
+        "https://www.rsna.org/rss/press-releases",
+        "https://pubs.rsna.org/action/showFeed?type=etoc&feed=rss&jc=radiol",
+        "https://www.nature.com/npjdigitalmed.rss",
+        "https://blogs.nvidia.com/blog/category/healthcare/feed/",
+        "https://www.sciencedaily.com/rss/computers_math/artificial_intelligence.xml",
+        "https://www.medicaldevice-network.com/feed/",
+    ]
+    fetch_and_save(_feeds, AIMedicalImagingContent)
 
 
 
