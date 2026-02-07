@@ -34,53 +34,48 @@ else:
     CELERY_BROKER_URL = redis_url
     CELERY_RESULT_BACKEND = redis_url
 
-# Celery Beat Schedule - Production optimized timing
-# Content is refreshed at different intervals to avoid recycling too often
+# Celery Beat Schedule - All content refreshed every 12 hours
 CELERY_BEAT_SCHEDULE = {
-    # High-traffic categories: every 4 hours
     'fetch-general-content': {
         'task': 'blog.tasks.fetch_general_content',
-        'schedule': 4 * 60 * 60,  # 4 hours
+        'schedule': 12 * 60 * 60,  # 12 hours
     },
     'fetch-ai-content': {
         'task': 'blog.tasks.fetch_ai_content',
-        'schedule': 4 * 60 * 60,  # 4 hours
+        'schedule': 12 * 60 * 60,  # 12 hours
     },
     'fetch-crypto-content': {
         'task': 'blog.tasks.fetch_crypto_content',
-        'schedule': 4 * 60 * 60,  # 4 hours (fast-moving market)
+        'schedule': 12 * 60 * 60,  # 12 hours
     },
-    # Medium-traffic categories: every 6 hours
     'fetch-cyber-content': {
         'task': 'blog.tasks.fetch_cyber_content',
-        'schedule': 6 * 60 * 60,  # 6 hours
+        'schedule': 12 * 60 * 60,  # 12 hours
     },
     'fetch-software-development': {
         'task': 'blog.tasks.fetch_sd_content',
-        'schedule': 6 * 60 * 60,  # 6 hours
+        'schedule': 12 * 60 * 60,  # 12 hours
     },
     'fetch-mobile-pc-content': {
         'task': 'blog.tasks.fetch_mobile_pc_content',
-        'schedule': 6 * 60 * 60,  # 6 hours
+        'schedule': 12 * 60 * 60,  # 12 hours
     },
     'fetch-medical-news': {
         'task': 'blog.tasks.fetch_medical_news',
-        'schedule': 6 * 60 * 60,  # 6 hours
+        'schedule': 12 * 60 * 60,  # 12 hours
     },
-    # Lower-traffic categories: every 8 hours
     'fetch-python-content': {
         'task': 'blog.tasks.fetch_python_content',
-        'schedule': 8 * 60 * 60,  # 8 hours
+        'schedule': 12 * 60 * 60,  # 12 hours
     },
     'fetch-ui-ux-content': {
         'task': 'blog.tasks.fetch_ui_ux_content',
-        'schedule': 8 * 60 * 60,  # 8 hours
+        'schedule': 12 * 60 * 60,  # 12 hours
     },
     'fetch-ai-medical-imaging': {
         'task': 'blog.tasks.fetch_ai_medical_imaging',
-        'schedule': 8 * 60 * 60,  # 8 hours
+        'schedule': 12 * 60 * 60,  # 12 hours
     },
-    # Slow-moving categories: every 12 hours
     'fetch-tech-jobs': {
         'task': 'blog.tasks.fetch_tech_jobs',
         'schedule': 12 * 60 * 60,  # 12 hours
