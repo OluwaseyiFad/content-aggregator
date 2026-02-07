@@ -21,6 +21,7 @@
             {% endif %}
             <h3><a href="{{ post.get_absolute_url }}">{{ post.title }}</a></h3>
             <p>{{ post.excerpt|default:post.body|truncatewords:30|safe }}</p>
+            <p style="color: #777; margin: 0.5em 0 0.2em 0; font-size: 0.9em;">By {{ post.author.username }}</p>
             <ul class="actions">
                 <li><a href="{{ post.get_absolute_url }}" class="button">Read More</a></li>
             </ul>
@@ -42,6 +43,7 @@
             {% endif %}
             <h3><a href="{{ post.get_absolute_url }}">{{ post.title }}</a></h3>
             <p>{{ post.excerpt|default:post.body|truncatewords:30|safe }}</p>
+            <p style="color: #777; margin: 0.5em 0 0.2em 0; font-size: 0.9em;">By {{ post.author.username }}</p>
             <small>{{ post.published_at|date:"M d, Y" }}</small>
             <ul class="actions">
                 <li><a href="{{ post.get_absolute_url }}" class="button">Read More</a></li>
