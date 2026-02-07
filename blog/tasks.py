@@ -212,4 +212,28 @@ def fetch_ai_medical_imaging():
     fetch_and_save(_feeds, AIMedicalImagingContent)
 
 
+@shared_task
+def cleanup_old_content():
+    """Delete RSS content older than 30 days"""
+    from django.utils import timezone
+    from datetime import timedelta
+
+    cutoff_date = timezone.now() - timedelta(days=30)
+
+    content_models = [
+        GeneralContent, AIContent, CryptoContent, CyberSecurityContent,
+        PythonContent, SoftwareDevelopmentContent, UiUxContent, MobilePcContent,
+        JobUpdatesContent, MedicalNewsContent, AIMedicalImagingContent
+    ]
+
+    total_deleted = 0
+    for model in content_models:
+        deleted = model.objects.filter(pub_date__lt=cutoff_date).delete()
+        total_deleted += deleted[0]
+        print(f"Deleted {deleted[0]} old items from {model.__name__}")
+
+    print(f"Total cleanup: {total_deleted} items deleted")
+    return total_deleted
+
+
 

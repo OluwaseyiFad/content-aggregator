@@ -80,6 +80,10 @@ CELERY_BEAT_SCHEDULE = {
         'task': 'blog.tasks.fetch_tech_jobs',
         'schedule': 12 * 60 * 60,  # 12 hours
     },
+    'cleanup-old-content': {
+        'task': 'blog.tasks.cleanup_old_content',
+        'schedule': 7 * 24 * 60 * 60,  # Weekly (7 days)
+    },
 }
 
 # Adding SSL configuration
