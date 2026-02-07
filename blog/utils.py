@@ -154,8 +154,9 @@ def save_new_contents(feed, Content):
                 tzinfos = {"PDT": -25200, "PST": -28800}  # PDT and PST offsets in seconds
                 pub_date = parser.parse(item.get('published', item.get('updated', '')), tzinfos=tzinfos)
                 description = html.unescape(cleanhtml(item.get('description', item.get('summary', ''))))
+                title = html.unescape(cleanhtml(item.get('title', item.get('name', ''))))
                 content = Content(
-                    title=item.get('title', item.get('name', '')),
+                    title=title,
                     description=description,
                     pub_date=pub_date,
                     link=item.get('link', item.get('url', '')),
