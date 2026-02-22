@@ -3779,7 +3779,7 @@ word-break: break-word !important;
 
 /* Responsive images inside post content */
 .post-content img {
-    max-width: 100%;
-    height: auto;
+    max-width: 100% !important;
+    height: auto !important;
     display: block;
 }
