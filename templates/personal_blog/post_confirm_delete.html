@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section>
+    <header class="main">
+        <h1>Delete Post</h1>
+    </header>
+
+    <div class="box">
+        <p>Are you sure you want to delete <strong>"{{ object.title }}"</strong>? This action cannot be undone.</p>
+
+        <form method="post">
+            {% csrf_token %}
+            <ul class="actions">
+                <li><input type="submit" value="Yes, Delete Post" class="button primary" style="background-color: #c0392b;"></li>
+                <li><a href="{% url 'personal_blog:my_posts' %}" class="button">Cancel</a></li>
+            </ul>
+        </form>
+    </div>
+</section>
+{% endblock %}
