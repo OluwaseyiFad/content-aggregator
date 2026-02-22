@@ -3776,3 +3776,10 @@ word-break: break-word !important;
     margin:0;
     text-shadow: 2px 2px 4px #333333;
 }
+
+/* Responsive images inside post content */
+.post-content img {
+    max-width: 100%;
+    height: auto;
+    display: block;
+}
