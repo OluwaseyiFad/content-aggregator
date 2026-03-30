@@ -1,17 +1,16 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.contrib.auth.decorators import user_passes_test
+from django.http import HttpResponseForbidden
 from django.views.generic import View, DetailView, ListView
-from django.views.generic.edit import FormMixin, DeleteView
-from django.urls import reverse, reverse_lazy
+from django.views.generic.edit import DeleteView
+from django.urls import reverse_lazy
 from django_staff_required.views import StaffRequiredMixin
-
 
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_protect
 
-from .models import Post, Comments, Category
-from .forms import CommentsForm, PostForm
+from .models import Post, Category
+from .forms import PostForm
 
 
 class MyPostView(StaffRequiredMixin, LoginRequiredMixin, ListView):
@@ -49,12 +48,16 @@ class CreatePostView(StaffRequiredMixin, LoginRequiredMixin, View):
 @method_decorator(csrf_protect, name='dispatch')
 class UpdatePostView(StaffRequiredMixin, LoginRequiredMixin, View):
     def get(self, request, pk):
-        post = Post.objects.get(pk=pk)
+        post = get_object_or_404(Post, pk=pk)
+        if post.author != str(request.user) and not request.user.is_superuser:
+            return HttpResponseForbidden()
         form = PostForm(instance=post)
         return render(request, 'update_post.html', {'form': form})
 
     def post(self, request, pk):
-        post = Post.objects.get(pk=pk)
+        post = get_object_or_404(Post, pk=pk)
+        if post.author != str(request.user) and not request.user.is_superuser:
+            return HttpResponseForbidden()
         form = PostForm(request.POST, instance=post)
         if form.is_valid():
             form.save()
@@ -94,32 +97,7 @@ class ForumCategoryView(ListView):
         return context
 
 
-@method_decorator(csrf_protect, name='dispatch')
-class ForumPostView(DetailView, FormMixin):
+class ForumPostView(DetailView):
     model = Post
     template_name = 'forum_post.html'
     context_object_name = 'post'
-    form_class = CommentsForm
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['comments'] = Comments.objects.filter(post=self.object)
-        context['form'] = self.get_form()
-        return context
-
-    def post(self, request, *args, **kwargs):
-        self.object = self.get_object()
-        form = self.get_form()
-        if form.is_valid():
-            return self.form_valid(form)
-        else:
-            return self.form_invalid(form)
-
-    def form_valid(self, form):
-        comment = Comments(
-            author=form.cleaned_data['author'],
-            body=form.cleaned_data['body'],
-            post=self.object
-        )
-        comment.save()
-        return redirect(reverse('forum:post', args=(self.object.pk,)))

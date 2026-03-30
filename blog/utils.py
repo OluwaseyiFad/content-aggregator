@@ -1,9 +1,11 @@
 import html
+import ipaddress
 import requests
 import re
 from io import BytesIO
 from PIL import Image
 from dateutil import parser
+from urllib.parse import urlparse
 
 from django.db.models import Q
 
@@ -24,8 +26,31 @@ def extract_images_from_html(html_content):
     return img_pattern.findall(html_content)
 
 
+def _is_safe_url(url):
+    """Return True only for public HTTP/HTTPS URLs (blocks SSRF to private/link-local addresses)."""
+    try:
+        parsed = urlparse(url)
+        if parsed.scheme not in ('http', 'https'):
+            return False
+        hostname = parsed.hostname
+        if not hostname:
+            return False
+        try:
+            addr = ipaddress.ip_address(hostname)
+            if addr.is_private or addr.is_loopback or addr.is_link_local or addr.is_reserved:
+                return False
+        except ValueError:
+            # hostname is a domain name — allow it
+            pass
+        return True
+    except Exception:
+        return False
+
+
 def validate_image_url(url, min_width=200):
     """Validate an image URL and return its width if valid."""
+    if not _is_safe_url(url):
+        return 0
     try:
         response = requests.get(url, stream=True, timeout=5)
         response.raise_for_status()

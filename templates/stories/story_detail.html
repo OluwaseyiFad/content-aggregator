@@ -62,9 +62,16 @@
     <!-- Like Button -->
     <hr>
     <div>
+        {% if user.is_authenticated %}
         <span class="like-button {% if user_liked %}liked{% endif %}" onclick="likeStory()">
             <i class="fas fa-heart"></i> <span id="like-count">{{ like_count }}</span> likes
         </span>
+        {% else %}
+        <span>
+            <i class="fas fa-heart"></i> <span id="like-count">{{ like_count }}</span> likes
+            &mdash; <a href="{% url 'user-creation:login' %}">Log in to like</a>
+        </span>
+        {% endif %}
     </div>
 
     <!-- Author Actions -->
