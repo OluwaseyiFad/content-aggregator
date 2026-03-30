@@ -8,6 +8,7 @@ from django.utils.safestring import mark_safe
 from .models import BlogPost, ImageGallery, GalleryImage, ProgressBoard, ProgressColumn, ProgressCard, BlogComment
 
 ALLOWED_TAGS = ['p', 'i', 'strong', 'em', 'a', 'ul', 'ol', 'li', 'h1', 'h2', 'h3', 'h4', 'blockquote', 'code', 'pre', 'img']
+ALLOWED_ATTRS = {'a': ['href', 'title'], 'img': ['src', 'alt', 'width', 'height', 'style'], 'code': ['class'], 'pre': ['class']}
 
 
 class BlogPostForm(forms.ModelForm):
@@ -43,9 +44,8 @@ class BlogPostForm(forms.ModelForm):
 
     def clean_body(self):
         body = self.cleaned_data.get('body')
-        if '<script>' in body.lower():
-            raise forms.ValidationError("Content cannot contain script tags.")
-        return mark_safe(body)
+        sanitized = clean(body, tags=ALLOWED_TAGS, attributes=ALLOWED_ATTRS, strip=True)
+        return mark_safe(sanitized)
 
 
 class ProgressBoardForm(forms.ModelForm):

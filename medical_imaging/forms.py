@@ -8,6 +8,7 @@ from django.utils.safestring import mark_safe
 from .models import MedicalImagingArticle, ArticleComment, ArticleImage
 
 ALLOWED_TAGS = ['p', 'i', 'strong', 'em', 'a', 'ul', 'ol', 'li', 'h1', 'h2', 'h3', 'h4', 'blockquote', 'code', 'pre']
+ALLOWED_ATTRS = {'a': ['href', 'title'], 'code': ['class'], 'pre': ['class']}
 
 
 class MedicalImagingArticleForm(forms.ModelForm):
@@ -50,9 +51,8 @@ class MedicalImagingArticleForm(forms.ModelForm):
 
     def clean_body(self):
         body = self.cleaned_data.get('body')
-        if '<script>' in body.lower():
-            raise forms.ValidationError("Content cannot contain script tags.")
-        return mark_safe(body)
+        sanitized = clean(body, tags=ALLOWED_TAGS, attributes=ALLOWED_ATTRS, strip=True)
+        return mark_safe(sanitized)
 
     def clean_summary(self):
         summary = self.cleaned_data.get('summary')

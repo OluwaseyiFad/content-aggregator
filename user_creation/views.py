@@ -35,7 +35,11 @@ class LoginView(FormView):
         return super().form_valid(form)
 
 
+@method_decorator(csrf_protect, name='dispatch')
 class LogoutView(FormView):
-    def get(self, request, *args, **kwargs):
+    def post(self, request, *args, **kwargs):
         auth_logout(request)
         return redirect('user-creation:login')
+
+    def get(self, request, *args, **kwargs):
+        return redirect('blog:homepage')

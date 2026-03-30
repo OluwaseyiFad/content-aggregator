@@ -9,7 +9,7 @@
                 </header>
                 <div class="forum-post">
                 {% for post in posts %}
-                     <h2>{{ post.title | safe}}</h2>
+                     <h2>{{ post.title }}</h2>
                      <small>
                         {{ post.created_on.date }} |&nbsp;
                         Categories:&nbsp;
@@ -21,7 +21,7 @@
                         Author:
                         {{ post.author }}
                     </small>
-                    <p>{{ post.body | slice:":400" | safe }}............<span><a class="cont"href="{% url 'forum:post' post.pk%}">read more</a></span></p>
+                    <p>{{ post.body | striptags | slice:":400" }}............<span><a class="cont"href="{% url 'forum:post' post.pk%}">read more</a></span></p>
                     <hr class="major" />
                 {% endfor %}
                 </div>

@@ -8,6 +8,7 @@ from django.utils.safestring import mark_safe
 from .models import Story, StoryChapter, StoryComment
 
 ALLOWED_TAGS = ['p', 'i', 'strong', 'em', 'a', 'ul', 'ol', 'li', 'h1', 'h2', 'h3', 'blockquote']
+ALLOWED_ATTRS = {'a': ['href', 'title']}
 
 
 class StoryForm(forms.ModelForm):
@@ -44,9 +45,8 @@ class StoryForm(forms.ModelForm):
 
     def clean_body(self):
         body = self.cleaned_data.get('body')
-        if '<script>' in body.lower():
-            raise forms.ValidationError("Story content cannot contain script tags.")
-        return mark_safe(body)
+        sanitized = clean(body, tags=ALLOWED_TAGS, attributes=ALLOWED_ATTRS, strip=True)
+        return mark_safe(sanitized)
 
 
 class StoryChapterForm(forms.ModelForm):
@@ -60,9 +60,8 @@ class StoryChapterForm(forms.ModelForm):
 
     def clean_body(self):
         body = self.cleaned_data.get('body')
-        if '<script>' in body.lower():
-            raise forms.ValidationError("Chapter content cannot contain script tags.")
-        return mark_safe(body)
+        sanitized = clean(body, tags=ALLOWED_TAGS, attributes=ALLOWED_ATTRS, strip=True)
+        return mark_safe(sanitized)
 
 
 class StoryCommentForm(forms.ModelForm):

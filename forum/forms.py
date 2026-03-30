@@ -8,7 +8,9 @@ from django.utils.safestring import mark_safe
 
 from .models import Post, Category
 
-ALLOWED_TAGS = ['p', 'i', 'strong', 'em']
+ALLOWED_TAGS = ['p', 'br', 'i', 'strong', 'em', 'ul', 'ol', 'li',
+                'a', 'h2', 'h3', 'h4', 'blockquote', 'code', 'pre']
+ALLOWED_ATTRS = {'a': ['href', 'title'], 'code': ['class'], 'pre': ['class']}
 
 
 class PostForm(forms.ModelForm):
@@ -42,10 +44,8 @@ class PostForm(forms.ModelForm):
 
     def clean_body(self):
         body = self.cleaned_data.get('body')
-        if '<script>' in body:
-            raise forms.ValidationError("Comment cannot contain script tags.")
-        sanitized_body = mark_safe(body)
-        return sanitized_body
+        sanitized = clean(body, tags=ALLOWED_TAGS, attributes=ALLOWED_ATTRS, strip=True)
+        return mark_safe(sanitized)
 
 
 class CommentsForm(forms.Form):

@@ -286,9 +286,12 @@ class MoveCardView(AuthorRequiredMixin, View):
         new_order = request.POST.get('order', 0)
 
         if new_column_id:
-            new_column = get_object_or_404(ProgressColumn, pk=new_column_id)
+            new_column = get_object_or_404(ProgressColumn, pk=new_column_id, board=card.column.board)
             card.column = new_column
-        card.order = int(new_order)
+        try:
+            card.order = int(new_order)
+        except (TypeError, ValueError):
+            card.order = 0
         card.save()
 
         return JsonResponse({'status': 'success'})
