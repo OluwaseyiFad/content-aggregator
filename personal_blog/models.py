@@ -1,4 +1,4 @@
-from django.db import models
+from django.db import IntegrityError, models
 from django.contrib.auth.models import User
 from django.utils.text import slugify
 from django.urls import reverse
@@ -27,12 +27,18 @@ class BlogPost(models.Model):
 
     def save(self, *args, **kwargs):
         if not self.slug:
-            self.slug = slugify(self.title)
-            original_slug = self.slug
+            base_slug = slugify(self.title)
+            self.slug = base_slug
             counter = 1
-            while BlogPost.objects.filter(slug=self.slug).exclude(pk=self.pk).exists():
-                self.slug = f"{original_slug}-{counter}"
-                counter += 1
+            while True:
+                try:
+                    super().save(*args, **kwargs)
+                    return
+                except IntegrityError:
+                    self.slug = f"{base_slug}-{counter}"
+                    counter += 1
+                    if counter > 100:
+                        raise
         super().save(*args, **kwargs)
 
     def get_absolute_url(self):

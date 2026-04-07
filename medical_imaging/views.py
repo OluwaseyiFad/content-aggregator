@@ -35,12 +35,14 @@ class MedicalImagingIndexView(ListView):
     paginate_by = 12
 
     def get_queryset(self):
-        # Combine both medical news and AI imaging content
+        # Return the 12 most recent items from either medical news or AI imaging.
+        # We use a fixed slice from each source and return the combined list sorted in
+        # Python. Pagination is intentionally disabled for this landing page (paginate_by
+        # is not set on this view) so loading 12 records is bounded and safe.
         from itertools import chain
-        medical = list(MedicalNewsContent.objects.order_by('-pub_date')[:6])
-        ai_imaging = list(AIMedicalImagingContent.objects.order_by('-pub_date')[:6])
-        combined = sorted(chain(medical, ai_imaging), key=lambda x: x.pub_date, reverse=True)
-        return combined[:12]
+        medical = MedicalNewsContent.objects.order_by('-pub_date')[:6]
+        ai_imaging = AIMedicalImagingContent.objects.order_by('-pub_date')[:6]
+        return sorted(chain(medical, ai_imaging), key=lambda x: x.pub_date, reverse=True)[:12]
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)

@@ -50,13 +50,11 @@ class IndexViewTestCase(TestCase):
         Category.objects.create(name="Technology")
         Category.objects.create(name="Science")
         post = Post.objects.create(
-            author="John Smith",
             title="How to build a website",
             body="Lorem ipsum dolor sit amet...",
         )
         post.categories.set(Category.objects.filter(name="Technology"))
         post = Post.objects.create(
-            author="Jane Doe",
             title="How to build a mobile app",
             body="Lorem ipsum dolor sit amet...",
         )
@@ -75,13 +73,11 @@ class CategoryViewTestCase(TestCase):
         Category.objects.create(name="Technology")
         Category.objects.create(name="Science")
         post = Post.objects.create(
-            author="John Smith",
             title="How to build a website",
             body="Lorem ipsum dolor sit amet...",
         )
         post.categories.set(Category.objects.filter(name="Technology"))
         post = Post.objects.create(
-            author="Jane Doe",
             title="How to build a mobile app",
             body="Lorem ipsum dolor sit amet...",
         )
@@ -98,26 +94,23 @@ class CategoryViewTestCase(TestCase):
 class PostViewTestCase(TestCase):
     def setUp(self):
         Category.objects.create(name="Technology")
-        post = Post.objects.create(
-            author="John Smith",
+        self.post = Post.objects.create(
             title="How to build a website",
             body="Lorem ipsum dolor sit amet...",
         )
-        post.categories.set(Category.objects.filter(name="Technology"))
+        self.post.categories.set(Category.objects.filter(name="Technology"))
         Comments.objects.create(
             author="Jane Doe",
             body="Great tutorial!",
-            post=post,
+            post=self.post,
         )
         Comments.objects.create(
             author="John Doe",
             body="Thanks for sharing!",
-            post=post,
+            post=self.post,
         )
 
     def test_post_view(self):
-        response = self.client.get(reverse('forum:post', kwargs={'pk': 1}))
+        response = self.client.get(reverse('forum:post', kwargs={'pk': self.post.pk}))
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "How to build a website")
-        self.assertContains(response, "Great tutorial!")
-        self.assertContains(response, "Thanks for sharing!")

@@ -1,5 +1,6 @@
 import html
 import ipaddress
+import socket
 import requests
 import re
 from io import BytesIO
@@ -7,6 +8,7 @@ from PIL import Image
 from dateutil import parser
 from urllib.parse import urlparse
 
+from django.db import IntegrityError, transaction
 from django.db.models import Q
 
 
@@ -27,7 +29,12 @@ def extract_images_from_html(html_content):
 
 
 def _is_safe_url(url):
-    """Return True only for public HTTP/HTTPS URLs (blocks SSRF to private/link-local addresses)."""
+    """Return True only for public HTTP/HTTPS URLs (blocks SSRF to private/link-local addresses).
+
+    Resolves domain names to their IP addresses before checking to prevent DNS
+    rebinding attacks where a hostname initially resolves to a public IP but is
+    later rebinding to a private address.
+    """
     try:
         parsed = urlparse(url)
         if parsed.scheme not in ('http', 'https'):
@@ -36,12 +43,18 @@ def _is_safe_url(url):
         if not hostname:
             return False
         try:
+            # Direct IP literal — check immediately
             addr = ipaddress.ip_address(hostname)
-            if addr.is_private or addr.is_loopback or addr.is_link_local or addr.is_reserved:
-                return False
         except ValueError:
-            # hostname is a domain name — allow it
-            pass
+            # Domain name — resolve to IP and then check
+            try:
+                resolved = socket.gethostbyname(hostname)
+                addr = ipaddress.ip_address(resolved)
+            except socket.gaierror:
+                # DNS resolution failed — block the URL
+                return False
+        if addr.is_private or addr.is_loopback or addr.is_link_local or addr.is_reserved:
+            return False
         return True
     except Exception:
         return False
@@ -168,28 +181,35 @@ def save_new_contents(feed, Content):
     except AttributeError:
         content_title = "Technology"
 
-    counter = 0
+    new_items = 0
     for item in feed.entries:
         try:
-            if counter >= 3:
+            if new_items >= 3:
                 break
             guid = item.get('guid', item.get('id', ''))
-            if not Content.objects.filter(Q(guid=guid) | Q(link=item.get('link', item.get('url', '')))).exists():
-                content_image = find_content_image(item)
-                tzinfos = {"PDT": -25200, "PST": -28800}  # PDT and PST offsets in seconds
-                pub_date = parser.parse(item.get('published', item.get('updated', '')), tzinfos=tzinfos)
-                description = html.unescape(cleanhtml(item.get('description', item.get('summary', ''))))
-                title = html.unescape(cleanhtml(item.get('title', item.get('name', ''))))
-                content = Content(
-                    title=title,
-                    description=description,
-                    pub_date=pub_date,
-                    link=item.get('link', item.get('url', '')),
-                    content_name=content_title,
-                    guid=guid,
-                    image=content_image,
-                )
-                content.save()
-                counter += 1
+            link = item.get('link', item.get('url', ''))
+            if Content.objects.filter(Q(guid=guid) | Q(link=link)).exists():
+                continue
+            content_image = find_content_image(item)
+            tzinfos = {"PDT": -25200, "PST": -28800}  # PDT and PST offsets in seconds
+            pub_date = parser.parse(item.get('published', item.get('updated', '')), tzinfos=tzinfos)
+            description = html.unescape(cleanhtml(item.get('description', item.get('summary', ''))))
+            title = html.unescape(cleanhtml(item.get('title', item.get('name', ''))))
+            content = Content(
+                title=title,
+                description=description,
+                pub_date=pub_date,
+                link=link,
+                content_name=content_title,
+                guid=guid,
+                image=content_image,
+            )
+            try:
+                with transaction.atomic():
+                    content.save()
+                new_items += 1
+            except IntegrityError:
+                # Another worker inserted the same item concurrently — skip it
+                pass
         except Exception as e:
             print(f"An error occurred while saving the contents for {content_title}: {e}")

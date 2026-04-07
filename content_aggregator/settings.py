@@ -28,11 +28,16 @@ redis_url = os.getenv("REDIS_URL", 'redis://localhost:6379')
 
 # Only add SSL params for rediss:// URLs (managed Redis services like Heroku)
 if redis_url.startswith('rediss://'):
-    CELERY_BROKER_URL = f"{redis_url}?ssl_cert_reqs=CERT_NONE"
-    CELERY_RESULT_BACKEND = f"{redis_url}?ssl_cert_reqs=CERT_NONE"
+    CELERY_BROKER_URL = f"{redis_url}?ssl_cert_reqs=CERT_REQUIRED"
+    CELERY_RESULT_BACKEND = f"{redis_url}?ssl_cert_reqs=CERT_REQUIRED"
 else:
     CELERY_BROKER_URL = redis_url
     CELERY_RESULT_BACKEND = redis_url
+
+# Explicitly lock Celery to JSON serialization to prevent pickle deserialization attacks
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_RESULT_SERIALIZER = 'json'
+CELERY_ACCEPT_CONTENT = ['json']
 
 # Celery Beat Schedule - All content refreshed every 12 hours
 CELERY_BEAT_SCHEDULE = {
@@ -186,8 +191,14 @@ if DEVELOPMENT_MODE is True:
         }
     }
 else:
+    _database_url = os.environ.get("DATABASE_URL")
+    if not _database_url:
+        raise RuntimeError(
+            "DATABASE_URL environment variable is required in production "
+            "(DEVELOPMENT_MODE is False). Set it before starting the server."
+        )
     DATABASES = {
-        "default": dj_database_url.parse(os.environ.get("DATABASE_URL")),
+        "default": dj_database_url.parse(_database_url),
     }
 # elif len(sys.argv) > 0 and sys.argv[1] != 'collectstatic':
 #     if os.getenv("DATABASE_URL", None) is None:
@@ -287,3 +298,15 @@ CRISPY_TEMPLATE_PACK = 'bootstrap4'
 
 LOGIN_URL = '/user/login/'
 LOGIN_REDIRECT_URL = '/home/'
+
+# CKEditor: isolate uploads per user so users cannot browse each other's files
+CKEDITOR_RESTRICT_BY_USER = True
+
+# Production security hardening — only active when DEBUG is off
+if not DEBUG:
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+    SECURE_SSL_REDIRECT = True
+    SECURE_HSTS_SECONDS = 31536000  # 1 year
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+    SECURE_HSTS_PRELOAD = True

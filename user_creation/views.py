@@ -34,6 +34,14 @@ class LoginView(FormView):
         auth_login(self.request, form.get_user())
         return super().form_valid(form)
 
+    def get_success_url(self):
+        next_url = self.request.POST.get('next') or self.request.GET.get('next')
+        if next_url:
+            from django.utils.http import url_has_allowed_host_and_scheme
+            if url_has_allowed_host_and_scheme(next_url, allowed_hosts={self.request.get_host()}):
+                return next_url
+        return str(self.success_url)
+
 
 @method_decorator(csrf_protect, name='dispatch')
 class LogoutView(FormView):

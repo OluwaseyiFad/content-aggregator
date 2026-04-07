@@ -1,5 +1,6 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.db.models import Max
 from django.views.generic import View, DetailView, ListView
 from django.views.generic.edit import FormMixin, DeleteView
 from django.urls import reverse, reverse_lazy
@@ -261,10 +262,11 @@ class AddCardView(AuthorRequiredMixin, View):
         if not title:
             return JsonResponse({'error': 'Title required'}, status=400)
 
+        max_order = column.cards.aggregate(Max('order'))['order__Max'] or -1
         card = ProgressCard.objects.create(
             column=column,
             title=title,
-            order=column.cards.count()
+            order=max_order + 1,
         )
         return JsonResponse({
             'id': card.pk,

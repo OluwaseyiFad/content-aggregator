@@ -1,3 +1,5 @@
+import logging
+
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.contrib.auth.models import User
 from django.urls import reverse_lazy
@@ -8,6 +10,8 @@ from django.utils import timezone
 from datetime import timedelta
 
 from .models import *
+
+logger = logging.getLogger(__name__)
 
 
 @method_decorator(csrf_protect, name='dispatch')
@@ -124,10 +128,11 @@ class AdminDashboardView(LoginRequiredMixin, StaffRequiredMixin, TemplateView):
 
         # Import models from other apps for comprehensive stats
         try:
-            from forum.models import ForumPost
+            from forum.models import Post as ForumPost
             context['total_forum_posts'] = ForumPost.objects.count()
-            context['recent_forum_posts'] = ForumPost.objects.order_by('-created_at')[:5]
-        except:
+            context['recent_forum_posts'] = ForumPost.objects.order_by('-created_on')[:5]
+        except Exception:
+            logger.exception("Failed to load forum stats for admin dashboard")
             context['total_forum_posts'] = 0
             context['recent_forum_posts'] = []
 
@@ -138,7 +143,8 @@ class AdminDashboardView(LoginRequiredMixin, StaffRequiredMixin, TemplateView):
             context['draft_medical_articles'] = MedicalImagingArticle.objects.filter(status='draft').count()
             context['pending_comments'] = ArticleComment.objects.filter(is_approved=False).count()
             context['recent_medical_articles'] = MedicalImagingArticle.objects.order_by('-created_at')[:5]
-        except:
+        except Exception:
+            logger.exception("Failed to load medical imaging stats for admin dashboard")
             context['total_medical_articles'] = 0
             context['published_medical_articles'] = 0
             context['draft_medical_articles'] = 0
@@ -149,7 +155,8 @@ class AdminDashboardView(LoginRequiredMixin, StaffRequiredMixin, TemplateView):
             from personal_blog.models import BlogPost
             context['total_blog_posts'] = BlogPost.objects.count()
             context['recent_blog_posts'] = BlogPost.objects.order_by('-created_at')[:5]
-        except:
+        except Exception:
+            logger.exception("Failed to load personal blog stats for admin dashboard")
             context['total_blog_posts'] = 0
             context['recent_blog_posts'] = []
 
@@ -157,7 +164,8 @@ class AdminDashboardView(LoginRequiredMixin, StaffRequiredMixin, TemplateView):
             from stories.models import Story
             context['total_stories'] = Story.objects.count()
             context['recent_stories'] = Story.objects.order_by('-created_at')[:5]
-        except:
+        except Exception:
+            logger.exception("Failed to load stories stats for admin dashboard")
             context['total_stories'] = 0
             context['recent_stories'] = []
 

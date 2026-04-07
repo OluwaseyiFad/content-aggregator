@@ -1,16 +1,21 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.http import HttpResponseForbidden
 from django.views.generic import View, DetailView, ListView
 from django.views.generic.edit import DeleteView
 from django.urls import reverse_lazy
-from django_staff_required.views import StaffRequiredMixin
 
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_protect
 
-from .models import Post, Category
-from .forms import PostForm
+from .models import Post, Category, Comments
+from .forms import PostForm, CommentsForm
+
+
+class StaffRequiredMixin(UserPassesTestMixin):
+    """Require staff or superuser access; returns 403 on failure."""
+    def test_func(self):
+        return self.request.user.is_staff or self.request.user.is_superuser
 
 
 class MyPostView(StaffRequiredMixin, LoginRequiredMixin, ListView):
@@ -20,7 +25,7 @@ class MyPostView(StaffRequiredMixin, LoginRequiredMixin, ListView):
     paginate_by = 10
 
     def get_queryset(self):
-        return Post.objects.filter(author=self.request.user).order_by('-created_on')
+        return Post.objects.filter(author=self.request.user).order_by('-created_on').select_related('author')
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -49,14 +54,14 @@ class CreatePostView(StaffRequiredMixin, LoginRequiredMixin, View):
 class UpdatePostView(StaffRequiredMixin, LoginRequiredMixin, View):
     def get(self, request, pk):
         post = get_object_or_404(Post, pk=pk)
-        if post.author != str(request.user) and not request.user.is_superuser:
+        if post.author != request.user and not request.user.is_superuser:
             return HttpResponseForbidden()
         form = PostForm(instance=post)
         return render(request, 'update_post.html', {'form': form})
 
     def post(self, request, pk):
         post = get_object_or_404(Post, pk=pk)
-        if post.author != str(request.user) and not request.user.is_superuser:
+        if post.author != request.user and not request.user.is_superuser:
             return HttpResponseForbidden()
         form = PostForm(request.POST, instance=post)
         if form.is_valid():
@@ -97,7 +102,30 @@ class ForumCategoryView(ListView):
         return context
 
 
+@method_decorator(csrf_protect, name='dispatch')
 class ForumPostView(DetailView):
     model = Post
     template_name = 'forum_post.html'
     context_object_name = 'post'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['comments'] = self.object.comments_set.order_by('created_on')
+        context['comment_form'] = CommentsForm()
+        return context
+
+    def post(self, request, pk):
+        if not request.user.is_authenticated:
+            return redirect('user-creation:login')
+        post = get_object_or_404(Post, pk=pk)
+        form = CommentsForm(request.POST)
+        if form.is_valid():
+            Comments.objects.create(
+                author=str(request.user),
+                body=form.cleaned_data['body'],
+                post=post,
+            )
+            return redirect('forum:post', pk=pk)
+        context = self.get_context_data(object=post)
+        context['comment_form'] = form
+        return render(request, self.template_name, context)

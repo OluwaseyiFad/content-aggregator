@@ -62,9 +62,9 @@ class BaseModel(models.Model):
     title = models.CharField(max_length=200)
     description = models.TextField()
     pub_date = models.DateTimeField()
-    link = models.URLField(max_length=2000)
+    link = models.URLField(max_length=2000, db_index=True)
     content_name = models.CharField(max_length=255)
-    guid = models.CharField(max_length=1000)
+    guid = models.CharField(max_length=1000, db_index=True)
     image = models.URLField(null=True, max_length=2000)
     source_feed = models.ForeignKey(
         RSSFeed, on_delete=models.SET_NULL, null=True, blank=True, related_name='+'

@@ -58,15 +58,18 @@ class CategoryModelTestCase(TestCase):
 
 class PostModelTestCase(TestCase):
     def setUp(self):
-        category = Category.objects.create(name="Technology")
+        from django.contrib.auth.models import User
+        self.user1 = User.objects.create_user(username="john_smith", password="pass")
+        self.user2 = User.objects.create_user(username="jane_doe", password="pass")
+        Category.objects.create(name="Technology")
         post = Post.objects.create(
-            author="John Smith",
+            author=self.user1,
             title="How to build a website",
             body="Lorem ipsum dolor sit amet...",
         )
         post.categories.set(Category.objects.filter(name="Technology"))
         post = Post.objects.create(
-            author="Jane Doe",
+            author=self.user2,
             title="How to build a mobile app",
             body="Lorem ipsum dolor sit amet...",
         )
@@ -75,8 +78,8 @@ class PostModelTestCase(TestCase):
     def test_post_author(self):
         post1 = Post.objects.get(title="How to build a website")
         post2 = Post.objects.get(title="How to build a mobile app")
-        self.assertEqual(post1.author, "John Smith")
-        self.assertEqual(post2.author, "Jane Doe")
+        self.assertEqual(post1.author, self.user1)
+        self.assertEqual(post2.author, self.user2)
 
     def test_post_categories(self):
         post1 = Post.objects.get(title="How to build a website")
@@ -87,9 +90,8 @@ class PostModelTestCase(TestCase):
 
 class CommentsModelTestCase(TestCase):
     def setUp(self):
-        category = Category.objects.create(name="Technology")
+        Category.objects.create(name="Technology")
         post = Post.objects.create(
-            author="John Smith",
             title="How to build a website",
             body="Lorem ipsum dolor sit amet...",
         )

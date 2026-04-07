@@ -1,10 +1,8 @@
 from crispy_forms.helper import FormHelper
 from django import forms
 from crispy_forms.layout import Layout, Div, Field, Submit
-# from ckeditor.widgets import CKEditorWidget
 from ckeditor_uploader.widgets import CKEditorUploadingWidget
 from bleach import clean
-from django.utils.safestring import mark_safe
 
 from .models import Post, Category
 
@@ -44,18 +42,10 @@ class PostForm(forms.ModelForm):
 
     def clean_body(self):
         body = self.cleaned_data.get('body')
-        sanitized = clean(body, tags=ALLOWED_TAGS, attributes=ALLOWED_ATTRS, strip=True)
-        return mark_safe(sanitized)
+        return clean(body, tags=ALLOWED_TAGS, attributes=ALLOWED_ATTRS, strip=True)
 
 
 class CommentsForm(forms.Form):
-    author = forms.CharField(
-        max_length=100,
-        widget=forms.TextInput(attrs={
-            "class": "form-control",
-            "placeholder": "Your Name"
-        })
-    )
     body = forms.CharField(widget=forms.Textarea(
         attrs={
             "class": "form-control",
@@ -63,15 +53,6 @@ class CommentsForm(forms.Form):
         }
     ))
 
-    def clean_author(self):
-        author = self.cleaned_data['author']
-        if any(char.isdigit() for char in author):
-            raise forms.ValidationError("Name cannot contain numbers.")
-        return author
-
     def clean_body(self):
         body = self.cleaned_data['body']
-        if '<script>' in body:
-            raise forms.ValidationError("Comment cannot contain script tags.")
-        sanitized_body = clean(body, tags=ALLOWED_TAGS, strip=True)
-        return sanitized_body
+        return clean(body, tags=ALLOWED_TAGS, strip=True)
