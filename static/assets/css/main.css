@@ -3783,3 +3783,28 @@ word-break: break-word !important;
     height: auto !important;
     display: block;
 }
+/* Logout button — matches #menu ul a/span styling exactly */
+#menu ul li form {
+    margin: 0;
+    padding: 0;
+}
+
+#menu ul li .nav-logout-btn {
+    background: none;
+    border: none;
+    color: inherit;
+    cursor: pointer;
+    display: block;
+    font-family: inherit;
+    font-size: 0.9em;
+    font-weight: inherit;
+    letter-spacing: inherit;
+    padding: 0.625em 0;
+    text-align: left;
+    text-transform: uppercase;
+    width: 100%;
+}
+
+#menu ul li .nav-logout-btn:hover {
+    color: #0984e3;
+}
